@@ -25,6 +25,7 @@ import (
 
 	"github.com/sigstore/cosign/cmd/cosign/cli/fulcio"
 	"github.com/sigstore/cosign/cmd/cosign/cli/options"
+	"github.com/sigstore/cosign/cmd/cosign/cli/rekor"
 	"github.com/sigstore/cosign/pkg/cosign"
 )
 
@@ -73,6 +74,12 @@ func validate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	rekorClient, err := rekor.NewClient("https://rekor.sigstore.dev")
+	if err != nil {
+		sendResponse(nil, fmt.Sprintf("creating Rekor client: %w", err), w)
+		return
+	}
+
 	// iterate over all keys
 	for _, key := range providerRequest.Request.Keys {
 		fmt.Println("verify signature for:", key)
@@ -83,9 +90,10 @@ func validate(w http.ResponseWriter, req *http.Request) {
 		}
 
 		checkedSignatures, bundleVerified, err := cosign.VerifyImageSignatures(ctx, ref, &cosign.CheckOpts{
-			RekorURL:           "https://rekor.sigstore.dev",
+			RekorClient:        rekorClient,
 			RegistryClientOpts: co,
 			RootCerts:          fulcio.GetRoots(),
+			IntermediateCerts: fulcio.GetIntermediates(),
 		})
 
 		if err != nil {

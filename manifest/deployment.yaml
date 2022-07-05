@@ -19,7 +19,7 @@ spec:
         run: cosign-gatekeeper-provider
     spec:
       containers:
-      - image: devopps/cosign-gatekeeper-provider:latest
+      - image: registry.cn-hangzhou.aliyuncs.com/denverdino/cosign-gatekeeper-provider:latest
         imagePullPolicy: IfNotPresent
         name: cosign-gatekeeper-provider
         ports:

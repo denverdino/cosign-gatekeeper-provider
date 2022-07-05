@@ -1,2 +1,3 @@
 /cosign-gatekeeper-provider
 dist/*
+vendor

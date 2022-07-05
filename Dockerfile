@@ -1,6 +1,6 @@
 ARG BUILDPLATFORM="linux/amd64"
-ARG BUILDERIMAGE="golang:1.17"
-ARG BASEIMAGE="gcr.io/distroless/static:nonroot"
+ARG BUILDERIMAGE="golang:1.18"
+ARG BASEIMAGE="knative-dev-registry.cn-hangzhou.cr.aliyuncs.com/distroless/static:nonroot"
 
 FROM --platform=$BUILDPLATFORM $BUILDERIMAGE as builder
 
@@ -18,13 +18,11 @@ ENV GO111MODULE=on \
 
 WORKDIR /go/src/github.com/developer-guy/cosign-gatekeeper-provider
 
-COPY go.mod go.sum ./
+COPY go.mod go.sum *.go ./
 
-RUN go mod download
-
-COPY . .
-
-RUN go build -o provider provider.go
+# Too slow to download the module dependencies
+COPY vendor vendor
+RUN go build -mod=vendor -o provider provider.go
 
 FROM $BASEIMAGE
 
